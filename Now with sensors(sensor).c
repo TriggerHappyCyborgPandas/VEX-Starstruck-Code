@@ -1,7 +1,7 @@
 #pragma config(UART_Usage, UART1, uartVEXLCD, baudRate19200, IOPins, None, None)
 #pragma config(UART_Usage, UART2, uartNotUsed, baudRate4800, IOPins, None, None)
-#pragma config(Sensor, dgtl1,  shoot,          sensorTouch)
 #pragma config(Sensor, dgtl2,  lift,           sensorTouch)
+#pragma config(Sensor, dgtl12, shoot,          sensorTouch)
 #pragma config(Motor,  port1,           LL3,           tmotorVex393HighSpeed_HBridge, openLoop)
 #pragma config(Motor,  port2,           LL1,           tmotorVex393HighSpeed_MC29, openLoop)
 #pragma config(Motor,  port3,           FL,            tmotorVex393HighSpeed_MC29, openLoop, reversed)
@@ -27,56 +27,81 @@
 #define C1LX vexRT[Ch4]
 #define C1LY vexRT[Ch3]
 #define C1RX vexRT[Ch1]
+int speed;
 
-void setLiftSpeed (int speed) {
+
+task intake() {
+	while(true) {
+		if (vexRT[Btn5U]){
+			speed = -127;
+			motor[LL1] = speed;
+				motor[LL2] = speed;
+				motor[LL3] = speed;
+				motor[LR1] = speed;
+				motor[LR2] = speed;
+				motor[LR3] = speed;
+			while( SensorValue[ shoot ] == 1 ) {
+				speed = 0;
+				motor[LL1] = speed;
+				motor[LL2] = speed;
+				motor[LL3] = speed;
+				motor[LR1] = speed;
+				motor[LR2] = speed;
+				motor[LR3] = speed;
+
+				if (vexRT[Btn5D]) {
+				speed = -127;
+				motor[LL1] = speed;
+				motor[LL2] = speed;
+				motor[LL3] = speed;
+				motor[LR1] = speed;
+				motor[LR2] = speed;
+				motor[LR3] = speed;
+				wait1Msec (200);
+				speed = 0;
+				motor[LL1] = speed;
+				motor[LL2] = speed;
+				motor[LL3] = speed;
+				motor[LR1] = speed;
+				motor[LR2] = speed;
+				motor[LR3] = speed;
+
+			}
+			}
+
+		}
+	}
 	motor[LL1] = speed;
 	motor[LL2] = speed;
 	motor[LL3] = speed;
 	motor[LR1] = speed;
 	motor[LR2] = speed;
 	motor[LR3] = speed;
-}
 
-task intake() {
-	while(true) {
-		if (vexRT[Btn5U]) {
-			if(SensorValue(shoot) == 0){
-				setLiftSpeed(-127);
-				wait1Msec(100);}
-			else{
-			while (SensorValue(shoot) == 1)
-				setLiftSpeed(0);
-				wait1Msec(500);
-
-			}
-
-		if (vexRT[Btn6D]) {
-			motor[LL1] = 0;
-			motor[LL2] = 0;
-			motor[LR1] = 0;
-			motor[LR2] = 0;
-			motor[LL3] = 0;
-			motor[LR3] = 0;
-		}
-		else if (vexRT[Btn6U]) {
-			motor[LL1] = 127;
-			motor[LL2] = 127;
-			motor[LR1] = 127;
-			motor[LR2] = 127;
-			motor[LL3] = 127;
-			motor[LR3] = 127;
-		}
-		else if(vexRT[Btn5D]) {
-			setLiftSpeed(127);
-			wait1Msec(700);
-			setLiftSpeed(0);
-		}
+	if (vexRT[Btn6D]) {
+		speed = 0;
+		motor[LL1] = speed;
+		motor[LL2] = speed;
+		motor[LL3] = speed;
+		motor[LR1] = speed;
+		motor[LR2] = speed;
+		motor[LR3] = speed;
+	}
+	else if (vexRT[Btn6U]) {
+		speed = 127;
+		motor[LL1] = speed;
+		motor[LL2] = speed;
+		motor[LL3] = speed;
+		motor[LR1] = speed;
+		motor[LR2] = speed;
+		motor[LR3] = speed;
 	}
 }
-}
+
+
 
 void init () {
-	startTask(intake);
+startTask(intake);
 }
 
 
@@ -89,15 +114,16 @@ task autonomous () {
 }
 
 task usercontrol() {
-	init();
-	while (true) {
-			// Y component, X component, Rotation
-		motor[FL] = -C1LY - C1LX - C1RX;
-		motor[FR] =  C1LY - C1LX - C1RX;
-		motor[BR] =  C1LY + C1LX - C1RX;
-		motor[BL] = -C1LY + C1LX - C1RX;
+init();
+while (true) {
+	// Y component, X component, Rotation
+	motor[FL] = -C1LY - C1LX - C1RX;
+	motor[FR] =  C1LY - C1LX - C1RX;
+	motor[BR] =  C1LY + C1LX - C1RX;
+	motor[BL] = -C1LY + C1LX - C1RX;
 
-		// Motor values can only be updated every 20ms
-		wait10Msec(2);
+	// Motor values can only be updated every 20ms
+	wait10Msec(2);
+
 }
 }
